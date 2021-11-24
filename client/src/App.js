@@ -1,34 +1,18 @@
-import React, { useState, useEffect }from 'react'
+import React from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
+import Login from './components/Login/Login';
+import Main from './components/Main/Main';
+import Register from './components/Register/Register';
 
-function App() {
-  const[data,setData] = useState([{}])
+const App = () => {
+    return (
+        <Router>
+            <Route path="/" exact component={Login} />
+            <Route path="/Main" exact component={Main} />
+            <Route path="/Register" exact component={Register} />
+        </Router>
+    );
+};
 
-  useEffect (() => {
-    
-    fetch("/tshirts").then(
-      res => res.json()
-    ).then(
-
-      data =>{
-        setData(data)
-        console.log(data)
-      }
-    )
-  }, [])
-
-  return (
-    <div>
-      {(typeof data.tshirts === 'undefined') ? (
-
-        <p>Loading ...</p>
-      ) : (
-        data.tshirts.map((tshirt,i) => (
-          <p key={i}>{tshirt}</p>
-        ))
-      )}
-    </div>
-  )
-}
-
-export default App
+export default App;
