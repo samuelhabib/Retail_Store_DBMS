@@ -1,34 +1,45 @@
-import React, { useState, useEffect }from 'react'
+import React, { useState } from 'react';
+import './App.css';
+import Products from './Products';
+import Cart from './Cart';
 
+const PAGE_PRODUCTS = 'products';
+const PAGE_CART = 'cart';
 
 function App() {
-  const[data,setData] = useState([{}])
+  const [cart, setCart] = useState([]);
+  const [page, setPage] = useState(PAGE_PRODUCTS);
 
-  useEffect (() => {
-    
-    fetch("/tshirts").then(
-      res => res.json()
-    ).then(
+  const navigateTo = (nextPage) => {
+    setPage(nextPage);
+  };
 
-      data =>{
-        setData(data)
-        console.log(data)
-      }
-    )
-  }, [])
+  const getCartTotal = () => {
+    return cart.reduce(
+      (sum, { quantity }) => sum + quantity,
+      0
+    );
+  };
 
   return (
-    <div>
-      {(typeof data.tshirts === 'undefined') ? (
+    <div className="App">
+      <header>
+        <button onClick={() => navigateTo(PAGE_CART)}>
+          Go to Cart ({getCartTotal()})
+        </button>
 
-        <p>Loading ...</p>
-      ) : (
-        data.tshirts.map((tshirt,i) => (
-          <p key={i}>{tshirt}</p>
-        ))
+        <button onClick={() => navigateTo(PAGE_PRODUCTS)}>
+          View Products
+        </button>
+      </header>
+      {page === PAGE_PRODUCTS && (
+        <Products cart={cart} setCart={setCart} />
+      )}
+      {page === PAGE_CART && (
+        <Cart cart={cart} setCart={setCart} />
       )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

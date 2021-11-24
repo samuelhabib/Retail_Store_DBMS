@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "jQuery": "^1.7.4",
+    "node-sass": "^6.0.1"
+  }
+}
