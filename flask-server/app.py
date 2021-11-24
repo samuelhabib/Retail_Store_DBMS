@@ -23,7 +23,7 @@ def tshirts():
 
     # db.execute("INSERT INTO admins(admin_id, username, user_pass, admin_address, phone) VALUES(:id, :username, :user_pass, :admin_address, :phone)", {"id":userid, "username":username, "user_pass":user_pass, "admin_address":admin_address, "phone":phone})
     # db.commit()
-    return{"tshirts" : ["tshirt1","tshirt2","tshirt3"]}
+    return{"tshirts" : ["tshirt1","tshirt2","tshirt3","tshirt4","tshirt5","tshirt6","tshirt7"]}
 
 
 if __name__ == "__main__":

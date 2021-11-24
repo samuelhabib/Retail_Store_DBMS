@@ -17,8 +17,8 @@ const LoadingScreen = () => {
 
 
     return (
-        <div class="main-loader">
-            <span class="main-loader2"><span class="loader-inner"></span></span>
+        <div className="main-loader">
+            <span className="main-loader2"><span className="loader-inner"></span></span>
         </div>
     );
 };
