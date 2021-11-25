@@ -1,0 +1,12 @@
+.register-body{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-image: url("https://cdn.wallpapersafari.com/81/63/VtEaQF.jpg");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    object-fit: fill;
+}

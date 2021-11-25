@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import $ from 'jquery';
 import 'animate.css';
 
@@ -11,8 +11,12 @@ const LoadingScreen = () => {
         $(window).on('load',function(){
             setTimeout(function() {
                 $('.main-loader').fadeOut('slow');
-            }, 500);
+            }, 20);
         });
+
+        return () => {
+            console.log("unmounted");
+        };
     }, []);
 
 

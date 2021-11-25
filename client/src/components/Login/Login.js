@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import $ from 'jquery';
 import 'animate.css';
 import '../../BootstrapCSS/bootstrap.min.css';
@@ -10,20 +10,47 @@ import LoadingScreen from '../LoadingScreen/LoadingScreen';
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState(false);
+    const history = useHistory();
 
     useEffect( () => {
         $(window).on('load', function(){
             setTimeout(function() {
                 $('.login-form').fadeIn('slow');
-            }, 500);
+            }, 20);
         });
+
+        return () => {
+            console.log("unmounted");
+        };
     }, []);
+
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError(false);
+        fetch("/login", {
+            method:"POST",
+            cache: "no-cache",
+            headers:{
+                "Content-type":"application/json",
+            },
+            body:JSON.stringify({username: username, password: password})
+        }).then(res => res.json()).then(res => {
+            if(res['alert'] !== 'error'){
+                history.push("/main");
+            } else{
+                setError(true);
+            }
+        });
+    };
+
 
     return (
         <div className="login-body">
             <LoadingScreen/>
             <div className="login-form" style={{display: "none"}}>
-                <form className="container" action="/" method="post">
+                <form onSubmit={handleSubmit} className="container" action="/main" method="get">
                     <h1>Login</h1>
                         
                     <div className="form-group">
@@ -36,12 +63,21 @@ const Login = () => {
                         <input type="password" placeholder="Enter Password" name="password" className="form-control" onChange={ (event) => setPassword(event.target.value) } required/>
                     </div>
 
-                    <Link onClick={ event => ((!username) || (!password)) ? event.preventDefault() : null} to={'/Main'}>
-                        <button type="submit" className="btn btn-primary btn-rounded" style={{borderRadius: "20px"}}>Login</button>
-                    </Link>
+                    {
+                        (username && password) ? (
+                            <button className="btn btn-primary btn-rounded" type="submit">Login</button>
+                        ) : (
+                            <button className="btn btn-primary btn-rounded" type="submit" disabled>Login</button>
+                        )
+                    }
 
                     <hr/>
-                    <a className="btn btn-primary btn-rounded" href="/register">Register here!</a>
+                    <a className="btn btn-primary btn-rounded" type="submit" href="/registration">Register here!</a>
+                    {
+                        (error) ? (
+                            <p style={{color:"red"}}>Incorrect username and/or password. Please try again</p>
+                        ) : null
+                    }
                 </form>
             </div>
         </div>
