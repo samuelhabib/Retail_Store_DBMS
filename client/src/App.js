@@ -6,6 +6,7 @@ import Main from './components/Main/Main';
 import Register from './components/Register/Register';
 import Products from './components/Products/Products';
 import Cart from './components/Cart/Cart';
+import Orders from './components/Orders/Orders';
 
 const App = () => {
     return (
@@ -15,6 +16,7 @@ const App = () => {
             <Route path="/Register" exact component={Register} />
             <Route path="/Products" exact component={Products} />
             <Route path="/Cart" exact component={Cart} />
+            <Route path="/Orders" exact component={Orders} />
         </Router>
     );
 };

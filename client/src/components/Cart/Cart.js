@@ -28,6 +28,54 @@ export default function Cart() {
               'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ5-QAul_NfAs-s0XW9M087xWyPOGWvbfYjmqSl0QXabZRSYoid47i7kISiAteyIh0YOci5mtQ&usqp=CAc',
             quantity: 1,
           },
+          {
+            category: "UTILITY",
+            name: 'AA Battery',
+            cost: 2.99,
+            image:
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ5-QAul_NfAs-s0XW9M087xWyPOGWvbfYjmqSl0QXabZRSYoid47i7kISiAteyIh0YOci5mtQ&usqp=CAc',
+            quantity: 4,
+          },
+          {
+              category: "UTILITY",
+              name: 'AA assa',
+              cost: 3.99,
+              image:
+                'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ5-QAul_NfAs-s0XW9M087xWyPOGWvbfYjmqSl0QXabZRSYoid47i7kISiAteyIh0YOci5mtQ&usqp=CAc',
+              quantity: 1,
+            },
+            {
+              category: "UTILITY",
+              name: 'AA asdsadssa',
+              cost: 3.99,
+              image:
+                'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ5-QAul_NfAs-s0XW9M087xWyPOGWvbfYjmqSl0QXabZRSYoid47i7kISiAteyIh0YOci5mtQ&usqp=CAc',
+              quantity: 1,
+            },
+            {
+                category: "UTILITY",
+                name: 'AA Battery',
+                cost: 2.99,
+                image:
+                  'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ5-QAul_NfAs-s0XW9M087xWyPOGWvbfYjmqSl0QXabZRSYoid47i7kISiAteyIh0YOci5mtQ&usqp=CAc',
+                quantity: 4,
+              },
+              {
+                  category: "UTILITY",
+                  name: 'AA assa',
+                  cost: 3.99,
+                  image:
+                    'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ5-QAul_NfAs-s0XW9M087xWyPOGWvbfYjmqSl0QXabZRSYoid47i7kISiAteyIh0YOci5mtQ&usqp=CAc',
+                  quantity: 1,
+                },
+                {
+                  category: "UTILITY",
+                  name: 'AA asdsadssa',
+                  cost: 3.99,
+                  image:
+                    'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ5-QAul_NfAs-s0XW9M087xWyPOGWvbfYjmqSl0QXabZRSYoid47i7kISiAteyIh0YOci5mtQ&usqp=CAc',
+                  quantity: 1,
+                },
     ]);
     const getTotalSum = () => {
     return cart.reduce(
