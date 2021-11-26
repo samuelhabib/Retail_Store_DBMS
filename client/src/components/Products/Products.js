@@ -82,10 +82,9 @@ const Products = () => {
 
     return (
         <div className="register-bodyy">
-            <NavBar userType={userType} />
             <div className="login-form">
                 <form onSubmit={handleSubmit} className="container" action="/main" method="get">
-                    <h1>Add a Product</h1>
+                    <h1>Add a Product to Inventory</h1>
                     <button id="register" onClick={handleMenu} className="btn btn-primary btn-rounded">{menu}</button>
                     <hr/>
 

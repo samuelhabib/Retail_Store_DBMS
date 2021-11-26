@@ -17,7 +17,7 @@ body {
 
 #card-recipe{
     transition: transform .2s;
-    max-width: 25%;
+    max-width: 20%;
     margin-left: 35px;
 }
 
@@ -35,7 +35,7 @@ body {
 }
 
 .card-body{
-    min-height: 250px;
+    min-height: 225px;
 }
 
 .card{

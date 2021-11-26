@@ -6,8 +6,9 @@ import NavBar from '../NavBar/NavBar'
 const Main = () => {
     const [cart, setCart] = useState([]);
     const [products, setProducts] = useState([]);
-    const [category, setCategory] = useState(0);
+    const [category, setCategory] = useState('');
     const [userType, setUserType] = useState('');
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         fetch("/getallproducts").then(res => res.json()).then(data => {
@@ -77,6 +78,19 @@ const Main = () => {
         })
     }
 
+    const handleSearch = () => {
+        fetch("/searchproduct", {
+            method:"POST",
+            cache: "no-cache",
+            headers:{
+                "Content-type":"application/json",
+            },
+            body:JSON.stringify({search: search})
+        }).then(res => res.json()).then(data => {
+            setProducts(data);
+        })
+    }
+
     return (
         <div className="order-main-bg">
             <NavBar userType={userType}/>
@@ -92,10 +106,11 @@ const Main = () => {
                         <option value='3'>Sweater</option>
                         <option value='4'>Socks</option>
                     </select>
-                    <br></br>
                     <button type="button" onClick={handleFilter} className={`btn btn-outline-info`}>Apply Filter</button>
+                    <br></br>
+                    <input onChange={ (event) => setSearch(event.target.value) }/>
+                    <button type="button" onClick={handleSearch} className={`btn btn-outline-info`}>Search Product</button>
                 </div>
-
 
                 <div className="products">
                     <div className="card-group card">

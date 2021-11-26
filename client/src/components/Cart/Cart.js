@@ -12,6 +12,7 @@ export default function Cart() {
     const [cardFound, setCardFound] = useState(false);
     const [cart, setCart] = useState([]);
     const [userType, setUserType] = useState('');
+    const [discount, setDiscount] = useState(0.0);
     const history = useHistory();
 
     useEffect(() => {
@@ -81,6 +82,14 @@ export default function Cart() {
         });
     }
 
+
+    const handleDiscount = () => {
+        fetch("/getdiscount").then(res => res.json()).then(res => {
+            console.log(res['discount'])
+            setDiscount(parseFloat(res['discount']));
+        });
+    }
+
     return (
         <div className="order-main-bg">
         <NavBar userType={userType}/>
@@ -130,7 +139,8 @@ export default function Cart() {
 
                         <hr className="line" />
                         <div className="d-flex justify-content-between information"><span>Subtotal</span><span>$ {getTotalSum().toFixed(2)} CAD</span></div>
-                        <div className="d-flex justify-content-between information"><span>Total (Incl. taxes 13%)</span><span>$ {(getTotalSum() * 1.13).toFixed(2)} CAD</span></div>
+                        <div className="d-flex justify-content-between information"><span>Total (Incl. taxes 13%) and {discount*100}% discount</span><span>$ {((getTotalSum() - (discount * getTotalSum())) * 1.13).toFixed(2)} CAD</span></div>
+                        <button onClick={handleDiscount} className={"btn btn-primary btn-block d-flex justify-content-between mt-3"}>Check for discount</button>
 
                         {
                         ((cardName && cardNum && cardDate && cardCVV) || (cardFound)) && (cart.length > 0) ? (
@@ -147,11 +157,7 @@ export default function Cart() {
                     </div>
                 </div>
             </div>
-
-
         </div>
-
-
 
     );
 }

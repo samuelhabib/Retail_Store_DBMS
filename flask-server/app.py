@@ -39,16 +39,17 @@ def register():
 
         if data['userType'] == 'customer':
             db.execute("INSERT INTO customers(customer_id, username, password, customer_address, phone) VALUES(:id, :username, :password, :address, :phone)", {"id":random_id, "username":username, "password":password, "address":admin_address, "phone":phone})
+            session['userType'] = 'customer'
             db.commit()
         else:
             db.execute("INSERT INTO admins(admin_id, username, password, admin_address, phone) VALUES(:id, :username, :password, :address, :phone)", {"id":random_id, "username":username, "password":password, "address":admin_address, "phone":phone})
+            session['userType'] = 'admin'
             db.commit()
 
         session['loggedIn'] = True
         session['username'] = username
-        session['userType'] = str(data['userType'])
+        session['id'] = random_id
         return jsonify(alert="success")
-
 
 
 @app.route('/login', methods = ['POST'])
@@ -248,6 +249,7 @@ def deleteProduct():
         if session['userType'] == 'admin':
             db.execute("DELETE FROM inventory WHERE product_id = :id", {"id":id})
             db.execute("DELETE FROM carts WHERE product_id = :id", {"id":id})
+            db.execute("DELETE FROM orders WHERE product_id = :id", {"id":id})
             db.execute("DELETE FROM products WHERE product_id = :id", {"id":id})
             db.commit()
 
@@ -333,6 +335,29 @@ def alterFilter():
         return jsonify(payload)
 
 
+@app.route("/searchproduct", methods = ['POST'])
+def searchProduct():
+    if request.method == 'POST':
+        data = request.json
+        search = str(data['search']).lower()
+        search = '%' + search + '%'
+        rv = db.execute("SELECT * FROM inventory INNER JOIN products USING(product_id) WHERE quantity > 0 AND lower(product_name) LIKE :search", {'search':search}).fetchall()
+
+        all_categories = {
+            0: 'Tshirt',
+            1: 'Pants',
+            2: 'Jacket',
+            3: 'Sweater',
+            4: 'Socks'
+        }
+        payload = []
+        content = {}
+        for result in rv:
+            content = {'id': result[0], 'quantity': result[2], 'productName': result[3], 'productDesc': result[4], 'category': all_categories[int(result[5])], 'price':result[6], 'picture':result[7]}
+            payload.append(content)
+            content = {}
+        return jsonify(payload)
+
 
 
 @app.route("/getallcart")
@@ -367,6 +392,21 @@ def getCart():
     for result in rv:
         payload.append(str(result[1]))
     return jsonify(payload)
+
+
+@app.route("/getdiscount")
+def getDiscount():
+    currentDate = datetime.now().strftime("%Y/%m/%d")
+    currentDate = '%' + currentDate + '%'
+
+    rv = db.execute(f"SELECT * FROM discount_table WHERE discount_date LIKE :date", {"date":currentDate}).fetchone()
+    discount = float(rv['discount_percent'])
+    date = '%' + str(rv['discount_date']) + '%'
+
+    if date == currentDate:
+        return jsonify({"discount":discount})
+    else:
+        return jsonify({"discount":0.0})
 
 
 

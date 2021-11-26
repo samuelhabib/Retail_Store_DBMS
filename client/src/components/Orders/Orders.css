@@ -14,5 +14,6 @@
 
 .order-main-bg{
     background-image: url("https://cdn.wallpapersafari.com/81/63/VtEaQF.jpg");
-    height: 100vh;
+    background-size: cover;
+    height: 200vh;
 }
