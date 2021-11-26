@@ -11,7 +11,7 @@ const LoadingScreen = () => {
         $(window).on('load',function(){
             setTimeout(function() {
                 $('.main-loader').fadeOut('slow');
-            }, 20);
+            }, 750);
         });
 
         return () => {

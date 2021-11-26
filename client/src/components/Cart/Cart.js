@@ -9,13 +9,36 @@ export default function Cart() {
     const [cardType, setCardType] = useState('mastercard');
     const [cardDate, setCardDate] = useState('');
     const [cardCVV, setCardCVV] = useState('');
+    const [cardFound, setCardFound] = useState(false);
     const [cart, setCart] = useState([]);
+    const [userType, setUserType] = useState('');
     const history = useHistory();
 
     useEffect(() => {
         fetch("/getallcart").then(res => res.json()).then(data => {
             setCart(data);
         });
+
+        fetch("/getusertype").then(res => res.json()).then(data => {
+            setUserType(data['type']);
+        });
+
+        fetch("/trypaymentinfo", {
+            method:"POST",
+            cache: "no-cache",
+            headers:{
+                "Content-type":"application/json",
+            },
+        }).then(res => res.json()).then(res => {
+            if(res['alert'] !== 'error'){
+                setCardType(res['paymentProvider']);
+                setCardName(res['name']);
+                setCardNum(res['cardNum']);
+                setCardCVV(res['cvv']);
+                setCardDate(res['date']);
+                setCardFound(true);
+            }
+        })
     }, [])
 
     const getTotalSum = () => {
@@ -59,7 +82,8 @@ export default function Cart() {
     }
 
     return (
-        <div>
+        <div className="order-main-bg">
+        <NavBar userType={userType}/>
             <div className="row no-gutters center">
                 <div><a className="btn btn-primary btn-rounded" href="/main">Back to shopping</a></div>
                 <div className="col-md-8">
@@ -91,19 +115,25 @@ export default function Cart() {
                         <label className="radio"> <input onClick={ (event) => setCardType(event.target.value)} type="radio" name="card" value="amex" /> <span><img width="30" src="https://img.icons8.com/ultraviolet/48/000000/amex.png" alt=""/></span> </label>
                         <label className="radio"> <input onClick={ (event) => setCardType(event.target.value)} type="radio" name="card" value="paypal" /> <span><img width="30" src="https://img.icons8.com/officel/48/000000/paypal.png" alt=""/></span> </label>
 
-                        <div><label className="credit-card-label">Name on card</label><input type="text" className="form-control credit-inputs" placeholder="Name" onChange={ (event) => setCardName(event.target.value) } /></div>
-                        <div><label className="credit-card-label">Card number</label><input type="text" className="form-control credit-inputs" placeholder="0000 0000 0000 0000" onChange={ (event) => setCardNum(event.target.value) }/></div>
+                        <div><label className="credit-card-label">Name on card</label><input value={cardName} type="text" className="form-control credit-inputs" placeholder="Name" onChange={ (event) => setCardName(event.target.value) } /></div>
+                        <div><label className="credit-card-label">Card number</label><input value={cardNum} type="text" className="form-control credit-inputs" placeholder="0000 0000 0000 0000" onChange={ (event) => setCardNum(event.target.value) }/></div>
                         <div className="row">
-                            <div className="col-md-6"><label className="credit-card-label">Date</label><input type="text" className="form-control credit-inputs" placeholder="12/24" onChange={ (event) => setCardDate(event.target.value) }/></div>
-                            <div className="col-md-6"><label className="credit-card-label">CVV</label><input type="text" className="form-control credit-inputs" placeholder="342" onChange={ (event) => setCardCVV(event.target.value) } /></div>
+                            <div className="col-md-6"><label className="credit-card-label">Date</label><input value={cardDate} type="text" className="form-control credit-inputs" placeholder="12/24" onChange={ (event) => setCardDate(event.target.value) }/></div>
+                            <div className="col-md-6"><label className="credit-card-label">CVV</label><input value={cardCVV} type="text" className="form-control credit-inputs" placeholder="342" onChange={ (event) => setCardCVV(event.target.value) } /></div>
                         </div>
+
+                        {
+                            (cardFound) ? (
+                                <p>Loaded details from previous records.</p>
+                            ) : null
+                        }
 
                         <hr className="line" />
                         <div className="d-flex justify-content-between information"><span>Subtotal</span><span>$ {getTotalSum().toFixed(2)} CAD</span></div>
                         <div className="d-flex justify-content-between information"><span>Total (Incl. taxes 13%)</span><span>$ {(getTotalSum() * 1.13).toFixed(2)} CAD</span></div>
 
                         {
-                        (cardName && cardNum && cardDate && cardCVV) ? (
+                        ((cardName && cardNum && cardDate && cardCVV) || (cardFound)) && (cart.length > 0) ? (
                             <button onClick={handleCheckout} className="btn btn-primary btn-block d-flex justify-content-between mt-3" type="button">
                                 <span>Checkout<i className="fa fa-long-arrow-right ml-1"></i></span>
                             </button>

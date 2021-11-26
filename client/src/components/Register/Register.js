@@ -20,7 +20,7 @@ const Register = () => {
         $(window).on('load', function(){
             setTimeout(function() {
                 $('.login-form').fadeIn('slow');
-            }, 20);
+            }, 750);
         });
     }, []);
 

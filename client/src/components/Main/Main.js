@@ -78,7 +78,7 @@ const Main = () => {
     }
 
     return (
-        <>
+        <div className="order-main-bg">
             <NavBar userType={userType}/>
             <div className="main-body">
                 <div className="main-header">
@@ -127,7 +127,7 @@ const Main = () => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 

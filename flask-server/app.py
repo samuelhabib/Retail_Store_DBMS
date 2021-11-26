@@ -106,6 +106,38 @@ def getAllProducts():
     return jsonify(payload)
 
 
+@app.route("/getorders")
+def getOrders():
+    all_categories = {
+            0: 'Tshirt',
+            1: 'Pants',
+            2: 'Jacket',
+            3: 'Sweater',
+            4: 'Socks'
+    }
+    id = session['id']
+
+    if session['userType'] == 'admin':
+        rv = db.execute("SELECT * FROM orders INNER JOIN products USING(product_id)").fetchall()
+        payload = []
+        content = {}
+        for result in rv:
+            content = {'productID':result[0], 'order_id': result[1], 'customer_id': result[2], 'quantity': result[3], 'date': result[4], 'productName': result[5], 'category':all_categories[int(result[7])], 'price':result[8]}
+            payload.append(content)
+            content = {}
+        return jsonify(payload)
+
+    else:
+        rv = db.execute(f"SELECT * FROM orders INNER JOIN products USING(product_id) WHERE customer_id = {id}").fetchall()
+        payload = []
+        content = {}
+        for result in rv:
+            content = {'productID':result[0], 'order_id': result[1], 'customer_id': result[2], 'quantity': result[3], 'date': result[4], 'productName': result[5], 'category':all_categories[int(result[7])], 'price':result[8]}
+            payload.append(content)
+            content = {}
+        return jsonify(payload)
+
+
 
 @app.route("/getexisting")
 def getExisting():
@@ -118,6 +150,17 @@ def getExisting():
         content = {}
     return jsonify(payload)
 
+
+@app.route("/trypaymentinfo", methods = ['POST'])
+def tryPaymentInfo():
+    id = session['id']
+    rv = db.execute(f"SELECT * FROM user_payments WHERE customer_id = {id}").fetchone()
+    
+    if rv is None:
+        return jsonify(alert="error")
+
+    content = {'alert':'success', 'paymentProvider': rv[2], 'cardNum': int(rv[3]), 'date':rv[4], 'cvv':int(rv[5]), 'name':rv[6]}
+    return jsonify(content)
 
 
 
@@ -241,6 +284,9 @@ def clearCart():
 @app.route("/removefrominventory")
 def removeFromInventory():
     id = int(session['id'])
+    currentDate = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+
+    
     if session['userType'] == 'customer':
         rv = db.execute(f"SELECT * FROM carts INNER JOIN inventory USING(product_id) WHERE customer_id = {id}").fetchall()
 
@@ -249,8 +295,10 @@ def removeFromInventory():
             product_id.append(int(result[0]))
 
         # equivalent to UPDATE "inventory SET quantity = quantity - 1 WHERE product_id in (all_id's)"
-        for id in product_id:
-            db.execute("UPDATE inventory SET quantity = quantity - 1 WHERE product_id = :id", {'id':id})
+        for productID in product_id:
+            random_id = random.randint(0, 1000)
+            db.execute("INSERT INTO orders(order_id, customer_id, product_id, quantity, date_purchased) VALUES(:order_id, :customer_id, :product_id, :quantity, :date_added)", {"order_id":random_id, "customer_id":id, "product_id":productID, "quantity":1 ,"date_added":currentDate})
+            db.execute("UPDATE inventory SET quantity = quantity - 1 WHERE product_id = :id", {'id':productID})
         db.commit()
     return jsonify(alert="success")
 
@@ -328,6 +376,7 @@ def addPayment():
     if request.method == 'POST':
         data = request.json
         random_id = random.randint(0, 1000)
+        id = session['id']
 
         customerID = session['id']
         cardType = data['cardType']
@@ -337,8 +386,11 @@ def addPayment():
         cardCVV = int(data['cardCVV'])
 
         if session['userType'] == 'customer':
-            db.execute("INSERT INTO user_payments(payment_id, customer_id, payment_provider, card_num, payment_expiry_date, cvv, payment_name) VALUES(:pay_id, :cust_id, :pay_prov, :card_num, :expiry, :cvv, :name)", {"pay_id":random_id, "cust_id":customerID, "pay_prov":cardType, "card_num":cardNum, "expiry":cardDate, "cvv":cardCVV, "name":cardName})
-            db.commit()
+            rv = db.execute(f"SELECT * FROM user_payments WHERE customer_id = {id}").fetchone()
+
+            if rv is None:
+                db.execute("INSERT INTO user_payments(payment_id, customer_id, payment_provider, card_num, payment_expiry_date, cvv, payment_name) VALUES(:pay_id, :cust_id, :pay_prov, :card_num, :expiry, :cvv, :name)", {"pay_id":random_id, "cust_id":customerID, "pay_prov":cardType, "card_num":cardNum, "expiry":cardDate, "cvv":cardCVV, "name":cardName})
+                db.commit()
             return jsonify(alert="success")
 
         return jsonify(alert="error")

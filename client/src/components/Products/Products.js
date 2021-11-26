@@ -4,6 +4,7 @@ import $ from 'jquery';
 import 'animate.css';
 import '../../BootstrapCSS/bootstrap.min.css';
 import './Products.css';
+import NavBar from '../NavBar/NavBar';
 
 const Products = () => {
     const [productName, setProductName] = useState('');
@@ -17,13 +18,18 @@ const Products = () => {
     const [productID, setProductID] = useState(0);
     const [price, setPrice] = useState(0);
     const [picture, setPicture] = useState('');
+    const [userType, setUserType] = useState('');
     const history = useHistory();
 
 
     useEffect(() => {
         fetch("/getexisting").then(res => res.json()).then(data => {
             setProducts(data);
-        })
+        });
+
+        fetch("/getusertype").then(res => res.json()).then(data => {
+            setUserType(data['type']);
+        });
     }, [])
 
     const handleSubmit = (e) => {
@@ -76,6 +82,7 @@ const Products = () => {
 
     return (
         <div className="register-bodyy">
+            <NavBar userType={userType} />
             <div className="login-form">
                 <form onSubmit={handleSubmit} className="container" action="/main" method="get">
                     <h1>Add a Product</h1>
