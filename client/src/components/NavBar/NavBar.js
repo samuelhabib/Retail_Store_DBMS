@@ -20,10 +20,10 @@ const NavBar = ({userType}) => {
     return (
         <nav className="navbar navbar-expand-lg bg-dark navbar-dark navbar-fixed-top">
             <div className="container-fluid">
-                <a className="navbar-brand" href="/">
+                <a className="navbar-brand" href="/main">
                     <img src="https://mdbootstrap.com/img/logo/mdb-transaprent-noshadows.png" height="20" alt="" loading="lazy"/>
                 </a>
-                <a className="navbar-brand" href="/">AST DBMS</a>
+                <a className="navbar-brand" href="/main">AST DBMS</a>
 
                 <button className="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <i className="fas fa-bars"></i>

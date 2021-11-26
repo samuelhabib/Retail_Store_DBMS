@@ -21,7 +21,7 @@ const Products = () => {
 
 
     useEffect(() => {
-        fetch("/getallproducts").then(res => res.json()).then(data => {
+        fetch("/getexisting").then(res => res.json()).then(data => {
             setProducts(data);
         })
     }, [])
@@ -75,7 +75,7 @@ const Products = () => {
     }
 
     return (
-        <div className="register-body">
+        <div className="register-bodyy">
             <div className="login-form">
                 <form onSubmit={handleSubmit} className="container" action="/main" method="get">
                     <h1>Add a Product</h1>

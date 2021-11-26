@@ -5,6 +5,7 @@ from flask_cors import CORS
 from functools import wraps
 import json
 import random
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "12345"
@@ -65,11 +66,14 @@ def login():
             else:
                 session['loggedIn'] = True
                 session['username'] = username
+                session['id'] = customer_attempt.customer_id
                 session['userType'] = 'customer'
                 return jsonify(alert="customer")
+
         else:
             session['loggedIn'] = True
             session['username'] = username
+            session['id'] = admin_attempt.admin_id
             session['userType'] = 'admin'
             return jsonify(alert="admin")
 
@@ -103,6 +107,17 @@ def getAllProducts():
 
 
 
+@app.route("/getexisting")
+def getExisting():
+    rv = db.execute("SELECT * FROM Products").fetchall()
+    payload = []
+    content = {}
+    for result in rv:
+        content = {'id': result[0], 'productName': result[1]}
+        payload.append(content)
+        content = {}
+    return jsonify(payload)
+
 
 
 
@@ -130,6 +145,42 @@ def addproduct():
 
 
 
+@app.route("/addtocart", methods = ['POST'])
+def addToCart():
+    if request.method == 'POST':
+        data = request.json
+
+        random_id = random.randint(0, 1000)
+        productID = int(data['productID'])
+        customerID = int(session['id'])
+        currentDate = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+
+        if session['userType'] == 'customer':
+            db.execute("INSERT INTO carts(cart_id, product_id, customer_id, date_added) VALUES(:cart_id, :product_id, :customer_id, :date_added)", {"cart_id":random_id, "product_id":productID, "customer_id":customerID, "date_added":currentDate})
+            db.commit()
+            return jsonify(alert="success")
+
+        return jsonify(alert="error")
+
+
+
+
+@app.route("/removefromcart", methods = ['POST'])
+def removeFromCart():
+    if request.method == 'POST':
+        data = request.json
+        productID = int(data['productID'])
+        customerID = int(session['id'])
+
+        if session['userType'] == 'customer':
+            db.execute("DELETE FROM carts WHERE product_id = :product_id AND customer_id = :customer_id", {"product_id": productID, "customer_id":customerID})
+            db.commit()
+            return jsonify(alert="success")
+
+        return jsonify(alert="error")
+
+
+
 @app.route("/existingproduct", methods = ['POST'])
 def existingProduct():
     if request.method == 'POST':
@@ -145,6 +196,68 @@ def existingProduct():
 
 
 
+@app.route("/deleteproduct", methods = ['POST'])
+def deleteProduct():
+    if request.method == 'POST':
+        data = request.json
+        id = int(data['id'])
+
+        if session['userType'] == 'admin':
+            db.execute("DELETE FROM inventory WHERE product_id = :id", {"id":id})
+            db.execute("DELETE FROM carts WHERE product_id = :id", {"id":id})
+            db.execute("DELETE FROM products WHERE product_id = :id", {"id":id})
+            db.commit()
+
+            rv = db.execute("SELECT * FROM inventory INNER JOIN products USING(product_id) WHERE quantity > 0").fetchall()
+            all_categories = {
+                0: 'Tshirt',
+                1: 'Pants',
+                2: 'Jacket',
+                3: 'Sweater',
+                4: 'Socks'
+            }
+            payload = []
+            content = {}
+            for result in rv:
+                content = {'id': result[0], 'quantity': result[2], 'productName': result[3], 'productDesc': result[4], 'category': all_categories[int(result[5])], 'price':result[6], 'picture':result[7]}
+                payload.append(content)
+                content = {}
+            return jsonify(payload)
+        return jsonify(alert="error")
+
+
+@app.route("/clearcart")
+def clearCart():
+    id = int(session['id'])
+    if session['userType'] == 'customer':
+        db.execute("DELETE FROM carts WHERE customer_id = :id", {"id":id})
+        db.commit()
+    return jsonify(alert="success")
+
+
+
+
+
+@app.route("/removefrominventory")
+def removeFromInventory():
+    id = int(session['id'])
+    if session['userType'] == 'customer':
+        rv = db.execute(f"SELECT * FROM carts INNER JOIN inventory USING(product_id) WHERE customer_id = {id}").fetchall()
+
+        product_id = []
+        for result in rv:
+            product_id.append(int(result[0]))
+
+        # equivalent to UPDATE "inventory SET quantity = quantity - 1 WHERE product_id in (all_id's)"
+        for id in product_id:
+            db.execute("UPDATE inventory SET quantity = quantity - 1 WHERE product_id = :id", {'id':id})
+        db.commit()
+    return jsonify(alert="success")
+
+
+
+
+
 
 @app.route("/alterfilter", methods = ['POST'])
 def alterFilter():
@@ -157,19 +270,79 @@ def alterFilter():
             rv = db.execute("SELECT * FROM inventory INNER JOIN products USING(product_id) WHERE quantity > 0").fetchall()
 
         all_categories = {
+            0: 'Tshirt',
+            1: 'Pants',
+            2: 'Jacket',
+            3: 'Sweater',
+            4: 'Socks'
+        }
+        payload = []
+        content = {}
+        for result in rv:
+            content = {'id': result[0], 'quantity': result[2], 'productName': result[3], 'productDesc': result[4], 'category': all_categories[int(result[5])], 'price':result[6], 'picture':result[7]}
+            payload.append(content)
+            content = {}
+        return jsonify(payload)
+
+
+
+
+@app.route("/getallcart")
+def getAllCart():
+    customerID = int(session['id'])
+    rv = db.execute(f"SELECT * FROM carts INNER JOIN products USING(product_id) WHERE customer_id = {customerID}").fetchall()
+    all_categories = {
         0: 'Tshirt',
         1: 'Pants',
         2: 'Jacket',
         3: 'Sweater',
         4: 'Socks'
     }
+
     payload = []
     content = {}
     for result in rv:
-        content = {'id': result[0], 'quantity': result[2], 'productName': result[3], 'productDesc': result[4], 'category': all_categories[int(result[5])], 'price':result[6], 'picture':result[7]}
+        content = {'id':result[0], 'date': result[3], 'productName': result[4], 'categoryID': all_categories[int(result[6])], 'price': result[7], 'picture': result[8], 'quantity':1}
         payload.append(content)
         content = {}
     return jsonify(payload)
+
+
+
+
+@app.route("/getcart")
+def getCart():
+    customerID = int(session['id'])
+    rv = db.execute(f"SELECT * FROM carts WHERE customer_id = {customerID}").fetchall()
+
+    payload = []
+    for result in rv:
+        payload.append(str(result[1]))
+    return jsonify(payload)
+
+
+
+
+@app.route("/addpayment", methods = ['POST'])
+def addPayment():
+    if request.method == 'POST':
+        data = request.json
+        random_id = random.randint(0, 1000)
+
+        customerID = session['id']
+        cardType = data['cardType']
+        cardName = data['cardName']
+        cardNum = int(data['cardNum'])
+        cardDate = str(data['cardDate'])
+        cardCVV = int(data['cardCVV'])
+
+        if session['userType'] == 'customer':
+            db.execute("INSERT INTO user_payments(payment_id, customer_id, payment_provider, card_num, payment_expiry_date, cvv, payment_name) VALUES(:pay_id, :cust_id, :pay_prov, :card_num, :expiry, :cvv, :name)", {"pay_id":random_id, "cust_id":customerID, "pay_prov":cardType, "card_num":cardNum, "expiry":cardDate, "cvv":cardCVV, "name":cardName})
+            db.commit()
+            return jsonify(alert="success")
+
+        return jsonify(alert="error")
+
 
 
 
